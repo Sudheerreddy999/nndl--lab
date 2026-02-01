@@ -1,0 +1,27 @@
+import tensorflow as tf
+import numpy as np
+
+# Training data
+X = np.array([[1, 8, 3]], dtype=float)
+y = np.array([[0.9]], dtype=float)
+
+# Build model
+model = tf.keras.Sequential([
+    tf.keras.layers.Dense(2, activation='sigmoid', input_shape=(3,)),
+    tf.keras.layers.Dense(1, activation='sigmoid')
+])
+
+# Compile model
+model.compile(
+    optimizer=tf.keras.optimizers.SGD(learning_rate=0.2),
+    loss='mean_squared_error'
+)
+
+# Train model
+model.fit(X, y, epochs=1000, verbose=0)
+
+# Prediction
+prediction = model.predict(X)
+print("Predicted Output:", prediction)
+1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 82ms/step
+Predicted Output: [[0.8999463]]

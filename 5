@@ -1,0 +1,29 @@
+!pip install ultralytics
+import cv2
+from ultralytics import YOLO
+from google.colab.patches import cv2_imshow
+from google.colab import files # Import files module earlier
+
+yolo = YOLO('yolov8n.pt')
+
+# Prompt user to upload the image file FIRST
+print('Please upload the image file:')
+uploaded = files.upload()
+
+image_path = None
+if uploaded:
+    # Assuming only one file is uploaded for simplicity
+    filename = list(uploaded.keys())[0]
+    image_path = f"/content/{filename}"
+    print(f'Uploaded file "{filename}" to {image_path}')
+else:
+    print("No file uploaded. Please upload an image to proceed.")
+
+# Only proceed if an image was uploaded
+if image_path:
+    results = yolo(image_path)
+    for r in results:
+        im_array = r.plot()     # plot a BGR numpy array of predictions
+        # OpenCV loads images as BGR, but cv2_imshow expects RGB for correct color display.
+        im_rgb = cv2.cvtColor(im_array, cv2.COLOR_BGR2RGB)
+        cv2_imshow(im_rgb)

@@ -1,0 +1,59 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import tensorflow as tf
+from tensorflow.keras.datasets import mnist
+
+# Load MNIST dataset
+(X_train, y_train), _ = mnist.load_data()
+
+# Build paired images (left + right) and labels (label = left digit)
+n_pairs = 5000
+X_double = []
+y_double = []
+for i in range(n_pairs):
+    left = X_train[i]
+    right = X_train[i + 1]
+    combined_image = np.hstack((left, right))   # shape (28, 56)
+    X_double.append(combined_image)
+    y_double.append(y_train[i])
+
+X_double = np.array(X_double, dtype=np.float32) / 255.0
+y_double = np.array(y_double, dtype=np.int32)
+
+# Shuffle dataset (recommended)
+perm = np.random.RandomState(1).permutation(len(X_double))
+X_double = X_double[perm]
+y_double = y_double[perm]
+
+# Build neural network model
+model = tf.keras.Sequential([
+    tf.keras.layers.Input(shape=(28, 56)),
+    tf.keras.layers.Flatten(),
+    tf.keras.layers.Dense(128, activation='relu'),
+    tf.keras.layers.Dense(10, activation='softmax')
+])
+
+# Compile model
+model.compile(
+    optimizer='adam',
+    loss='sparse_categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+# Train model (show progress)
+model.fit(X_double, y_double, epochs=10, batch_size=64, verbose=1, validation_split=0.1)
+
+# User input
+index = int(input(f"Enter an index value (0 to {len(X_double)-1}): "))
+
+# Display combined image
+plt.imshow(X_double[index], cmap='gray')
+plt.title("Combined Handwritten Digit Image (left | right)")
+plt.axis('off')
+plt.show()
+
+# Predict digit (model trained to predict left digit)
+sample = X_double[index].reshape(1, 28, 56)
+prediction = model.predict(sample, verbose=0)
+print("Predicted Digit (left):", int(np.argmax(prediction)))
+print("Actual Digit (left):", int(y_double[index]))

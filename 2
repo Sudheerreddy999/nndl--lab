@@ -1,0 +1,43 @@
+import tensorflow as tf
+from tensorflow.keras.datasets import mnist
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Load MNIST dataset
+(X_train, y_train), (X_test, y_test) = mnist.load_data()
+
+# Normalize pixel values
+X_train = X_train / 255.0
+X_test = X_test / 255.0
+
+# Build the neural network model
+model = tf.keras.Sequential([
+    tf.keras.layers.Flatten(input_shape=(28, 28)),
+    tf.keras.layers.Dense(128, activation='relu'),
+    tf.keras.layers.Dense(10, activation='softmax')
+])
+
+# Compile model
+model.compile(
+    optimizer='adam',
+    loss='sparse_categorical_crossentropy',
+    metrics=['accuracy']
+)
+
+# Train the model
+model.fit(X_train, y_train, epochs=10, verbose=0)
+
+# Take user input
+index = int(input("Enter an index value (0 to 9999): "))
+
+# Display the image
+plt.imshow(X_test[index], cmap='gray')
+plt.title("Input Handwritten Digit")
+plt.axis('off')
+plt.show()
+
+# Predict the digit
+sample = X_test[index].reshape(1, 28, 28)
+prediction = model.predict(sample)
+print("Predicted Digit:", np.argmax(prediction))
+print("Actual Digit:", y_test[index])
